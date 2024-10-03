@@ -1,0 +1,499 @@
+openapi: 3.0.3
+info:
+  title: Aranpani APIs
+  description: |-
+    API documentation for the Aranpani platform.
+  version: 1.0.0
+servers:
+  - url: https://aranpani.aashish-kumar.site/api/v1
+    description: Development Server
+  - url: https://aranpani.aashish-kumar.site/api/v1
+    description: Production Server
+
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - auth
+      summary: User Signup
+      description: Signup a new user by providing their email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      example: god3@gmail.com
+                    password:
+                      type: string
+                      example: smallCAPITAL@3
+      responses:
+        '200':
+          description: A successful signup response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                        example: god3@gmail.com
+                      token:
+                        type: string
+                        example: jwt-token-here
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: User Login
+      description: Authenticate a user and return an access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      example: god3@gmail.com
+                    password:
+                      type: string
+                      example: smallCAPITAL@3
+                token:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: access
+      responses:
+        '200':
+          description: A successful login response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                        example: god3@gmail.com
+                      token:
+                        type: string
+                        example: jwt-token-here
+                        
+  /auth/forgot:
+    post:
+      tags:
+        - auth
+      summary: Forgot Password
+      description: Request password reset for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: god3@gmail.com
+      responses:
+        '200':
+          description: Password reset email sent successfully.
+        '404':
+          description: Email not found.
+
+  /projects:
+    post:
+      tags:
+        - projects
+      summary: Create Project
+      description: Create a new project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Project X
+                inchargeName:
+                  type: string
+                  example: John Doe
+                registrationNumber:
+                  type: string
+                  example: REG12345
+      responses:
+        '201':
+          description: Project created successfully.
+
+    get:
+      tags:
+        - projects
+      summary: List Projects
+      description: Retrieve a list of all projects.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 100
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: List of projects retrieved successfully.
+
+  /projects/{id}:
+    put:
+      tags:
+        - projects
+      summary: Update Project
+      description: Update the details of an existing project.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inchargeName:
+                  type: string
+                  example: John Doe
+                startDate:
+                  type: string
+                  format: date
+                  example: 2023-09-22
+      responses:
+        '200':
+          description: Project updated successfully.
+
+    delete:
+      tags:
+        - projects
+      summary: Delete Project
+      description: Remove a project by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Project deleted successfully.
+          
+    get:
+      tags:
+        - projects
+      summary: Get Presigned URL for File Upload
+      description: Retrieve a presigned URL for uploading a file to the project.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: 64d36d8fb8eb47ab23da5321
+        - name: file
+          in: query
+          required: true
+          schema:
+            type: string
+            example: abc.png
+      responses:
+        '200':
+          description: A presigned URL for file upload.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  presignedUrl:
+                    type: string
+                    example: https://s3.amazonaws.com/yourbucket/abc.png?AWSAccessKeyId=...
+                  method:
+                    type: string
+                    example: PUT
+        '401':
+          description: Unauthorized request.
+        '404':
+          description: Project or file not found.
+
+  /projects/{id}/status:
+    patch:
+      tags:
+        - projects
+      summary: Update Project Status
+      description: Update the status of a specific project.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: planned
+                metadata:
+                  type: object
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                      example: 2023-09-22
+                    estimatedAmount:
+                      type: number
+                      example: 3000
+                    expensedAmount:
+                      type: number
+                      example: 2500
+      responses:
+        '200':
+          description: Project status updated successfully.
+        '404':
+          description: Project not found.
+
+  /donors:
+    get:
+      tags:
+        - donors
+      summary: List Donors
+      description: Retrieve a list of all donors.
+      responses:
+        '200':
+          description: List of donors retrieved successfully.
+        '404':
+          description: Donors not found.
+
+    post:
+      tags:
+        - donors
+      summary: Create Donor
+      description: Add a new donor.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                contactNumber:
+                  type: string
+                  example: 1234567890
+      responses:
+        '201':
+          description: Donor created successfully.
+
+  /donors/{id}:
+    patch:
+      tags:
+        - donors
+      summary: Update Donor
+      description: Modify details of an existing donor.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: john@example.com
+      responses:
+        '200':
+          description: Donor updated successfully.
+
+    delete:
+      tags:
+        - donors
+      summary: Delete Donor
+      description: Remove a donor by their ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Donor deleted successfully.
+
+  /payments:
+    get:
+      tags:
+        - payments
+      summary: List Payments
+      description: Retrieve a list of all payments.
+      responses:
+        '200':
+          description: List of payments retrieved successfully.
+
+    post:
+      tags:
+        - payments
+      summary: Process Payment
+      description: Handle a new payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 100
+                donorId:
+                  type: string
+                  example: 64c779be7a850bbd56d8850b
+      responses:
+        '201':
+          description: Payment processed successfully.
+
+  /locations/countries:
+    get:
+      tags:
+        - locations
+      summary: List Countries
+      description: Retrieve a list of all available countries.
+      responses:
+        '200':
+          description: List of countries retrieved successfully.
+
+  /locations/states/{countryId}:
+    get:
+      tags:
+        - locations
+      summary: List States by Country
+      description: Retrieve states for a specific country.
+      parameters:
+        - name: countryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of states retrieved successfully.
+
+  /locations/cities/{stateId}:
+    get:
+      tags:
+        - locations
+      summary: List Cities by State
+      description: Retrieve cities for a specific state.
+      parameters:
+        - name: stateId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of cities retrieved successfully.
+
+components:
+  schemas:
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        inchargeName:
+          type: string
+        registrationNumber:
+          type: string
+        status:
+          type: string
+        metadata:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+            estimatedAmount:
+              type: number
+            expensedAmount:
+              type: number
+
+    Donor:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        contactNumber:
+          type: string
+        email:
+          type: string
+        status:
+          type: string
+        subscription:
+          type: string
+          example: monthly
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
+        donorId:
+          type: string
+        status:
+          type: string
